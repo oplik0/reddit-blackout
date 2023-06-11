@@ -11,7 +11,11 @@ The `pyproject.toml` and `poetry.lock` files are from a tool called [Poetry](htt
 
 1. Use this repository as a template or fork it (note that forks can't be set to private)
 
-![fork button location](https://user-images.githubusercontent.com/25460763/183402131-46c4955f-9545-4ca5-8c9c-da8f860075a5.png)
+   ![use as a template location](https://github.com/oplik0/reddit-blackout/assets/25460763/c7cefaf8-4304-4e20-9496-b8ce1b5aede1)
+   
+   or
+   
+   ![fork button location](https://user-images.githubusercontent.com/25460763/183402131-46c4955f-9545-4ca5-8c9c-da8f860075a5.png)
 
 2. Create a new Reddit app:
     1. Go to https://www.reddit.com/prefs/apps/
