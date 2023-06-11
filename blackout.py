@@ -81,7 +81,7 @@ def private_subreddit(subreddit):
         subreddit.contributor.remove(contributor)
 
     # new description can be set via the environment, or will default to a message about the blackout with relevant links
-    new_description = f"/r/{subreddit.display_name} {environ.get('SUBREDDIT_DESCRIPTION')}" or f"/r/{subreddit.display_name} is now private to protest Reddits API pricing changes and the death of 3rd party apps. Click here to find out why we have gone dark](https://www.theverge.com/2023/6/5/23749188/reddit-subreddit-private-protest-api-changes-apollo-charges). [You can also find a list of other subs that are going dark here](https://reddark.untone.uk/)."
+    new_description = f"/r/{subreddit.display_name} {environ.get('SUBREDDIT_DESCRIPTION') or 'is now private to protest Reddits API pricing changes and the death of 3rd party apps. Click here to find out why we have gone dark](https://www.theverge.com/2023/6/5/23749188/reddit-subreddit-private-protest-api-changes-apollo-charges). [You can also find a list of other subs that are going dark here](https://reddark.untone.uk/).'}"
 
     # set the subreddit to private    
     subreddit.mod.update(public_description=new_description,
