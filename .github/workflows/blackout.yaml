@@ -1,3 +1,5 @@
+name: blackout
+
 on:
   schedule:
     # schedule the action to run at midnight UTC on the 12th of June and again on the 14th of June to reset
@@ -39,6 +41,7 @@ jobs:
         run: poetry run python blackout.py
         # sets the environment variables to the secret values from the repository
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
           REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}

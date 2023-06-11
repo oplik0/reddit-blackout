@@ -14,6 +14,9 @@ import csv
 # regular expression module - here just used to split a string into a list with whitespace removed
 from re import split
 
+# used to run the gh command to disable the workflow after blackout is over
+import subprocess
+
 # reddit API wrapper, basically makes connecting to reddit really simple and more readable
 # without this one would need to write a lot of code to even log in
 import praw
@@ -91,15 +94,7 @@ def private_subreddit(subreddit):
 
 def unschedule():
     """Removes cron triggers from the action"""
-    with open(".github/workflows/blackout.yaml", "r") as workflow:
-        # load the workflow file into memory
-        lines = workflow.readlines()
-    with open(".github/workflows/blackout.yaml", "w") as workflow:
-        for line in lines:
-            # remove all lines that contain "cron" or "schedule"
-            if "cron" not in line and "schedule" not in line:
-                workflow.write(line)
-
+    subprocess.run(["gh", "workflow", "disable", "blackout"])
 # a function just as good practice - so this can be imported and called from other scripts
 def main():
     """Set moderated subreddits to private."""

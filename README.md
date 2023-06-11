@@ -1,5 +1,5 @@
 # Reddit Blackout
-Set your subreddits to private for 48 hours
+Set your subreddits to private and remove all contributors for 48 hours. Afterwards it restores everything and stops itself from running in the future.
 
 ## What is this doing
 
@@ -78,3 +78,7 @@ If you aren't familiar with cron's notation (and even if you are), you can use a
 ## How to do indefinite blackout
 
 Just remove the schedule section of the workflow and run the workflow manually instead
+
+## How to reenable?
+
+If you decided you want to protest more, all you need to do it go to actions>blackout, enable workflow, and run it manually (or modify the schedule as you see fit)
