@@ -1,0 +1,55 @@
+on:
+  schedule:
+    # this runs at midnight UTC on the 12th of June and again on the 14th of June to reset
+    # https://crontab.guru/ is useful for generating the cron expression
+    - cron: "0 0 12 06 *"
+    - cron: "0 0 14 06 *"
+  # used to run the workflow manually
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  # our main and only job :)
+  blackout:
+    # Ubuntu is the easiest to use here and uses least resources if you wanted to run it in a private repository
+    # (Public repositories can run Actions entirely for free, private have a time quota)
+    runs-on: ubuntu-latest
+    steps:
+      # this ensures the code is in the workspace
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+      # poetry is used for installing dependencies, in this case just `praw`, the Reddit API wrapper
+      - name: Install poetry
+        run: pipx install poetry
+      # ensures the correct version of python is installed and adds a dependency cache to make future installs faster
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "poetry"
+      - name: Install dependencies
+        run: poetry install
+      # runs the script with environment variables set to our secrets from the repository
+      # their values won't be displayed in any output
+      - name: Blackout script
+        run: poetry run python blackout.py
+        # sets the environment variables to the secret values from the repository
+        env:
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
+          REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
+          REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
+          SUBREDDIT_BLACKLIST: ${{ secrets.SUBREDDIT_BLACKLIST }}
+          SUBREDDIT_WHITELIST: ${{ secrets.SUBREDDIT_WHITELIST }}
+          SUBREDDIT_DESCRIPTION: ${{ secrets.SUBREDDIT_DESCRIPTION }}
+      # commits the changes to the repository
+      - name: Commit backups
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Commit backup files"
+          commit_options: "--no-verify"
+          file_pattern: "*.csv"
