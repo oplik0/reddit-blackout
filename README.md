@@ -34,8 +34,9 @@ The `pyproject.toml` and `poetry.lock` files are from a tool called [Poetry](htt
     - `REDDIT_CLIENT_ID` - the ID of the app from earlier
     - `REDDIT_CLIENT_SECRET` - the app secret from earlier
     - `REDDIT_USERNAME` - your username
-    - `REDDIT_PASSWORD` - your password; Unfortunately this authentication flow requires it. For hosted applications normal Oauth2 flow would be better, but as this repository is meant to be copied and used for a single account this is the least bad option.
-    - `REDDIT_USER_AGENT` (optional) - how the application will identify itself to Reddit. Defaults to "Blackout Bot"
+    - `REDDIT_PASSWORD` - your password; Unfortunately this authentication flow requires it. For hosted applications normal Oauth2 flow would be better, but as this repository is meant to be copied and used for a single account this is the least bad option. WARNING: 2FA unfortunately has to be disabled for this method to work
+    - `REDDIT_REFRESH_TOKEN` (optional, instead of username/password) - refresh token obtained from Reddit OAuth API for your account. Unfortunately, as the user is redirected to a specified website during this flow, it's not trivial to set it up here. More info in []
+    - `REDDIT_USER_AGENT` (optional) - how the application will identify itself to Reddit. Defaults to "Blackout" (warning: including bot here will make the script fail for some reason)
     - `SUBREDDIT_BLACKLIST` (optional) - comma separated list of subreddits excluded from being privated. Takes precedence over whitelist.
     - `SUBREDDIT_WHITELIST` (optional) - comma separated list of subreddits. If set, only the included subreddits will be privated
     - `SUBREDDIT_DESCRIPTION` (optional) - custom text to change the subreddit description to (inserted after the subreddit name)
@@ -49,6 +50,18 @@ The `pyproject.toml` and `poetry.lock` files are from a tool called [Poetry](htt
 6. And it'd done - the workflow will now run at 00:00 UTC the 12th of July. You can also trigger it manually by going to Actions, selecting `.github/workflows/blackout.yml` and using the `Run workflow` button:
 
 ![Running the workflow manually](https://user-images.githubusercontent.com/25460763/183406938-af2f4c77-9f8b-44bb-bf15-6943e120d1e5.png)
+
+## How to use with 2FA
+
+For password authentication reddit requires the user to append the 2FA code after a colon (eg. `yourpassword:123456`). This is obviously not practical for this script. There is a better way - oauth, but unfortunately it's non trivial without a server running. There are 2 options here:
+1. Easier one: https://not-an-aardvark.github.io/reddit-oauth-helper/ (note: unfortunately it seems broken in Firefox, try any Chromium based browsers)
+   This is a client-side application for generating the required tokens. You need to set the redirect URL in your reddit app to `https://not-an-aardvark.github.io/reddit-oauth-helper/`, paste your client id/secret into the right inputs, select permanent (otherwise the token will be disabled after 1 hour) and select scopes: `modconfig`, `modcontributors` and `mysubreddits`.
+   Then click generate tokens, authorize the application, and you should get refresh/access tokens.
+   As this app doesn't pass this info to any server (and is running off of GitHub Pages with their URL - so you can see the code here: https://github.com/not-an-aardvark/reddit-oauth-helper), it shouldn't pose any risk. But still, make sure you only grant the token access to what it needs.
+2. A bit more advanced: you can use the script provided by praw here: https://praw.readthedocs.io/en/stable/tutorials/refresh_token.html#obtaining-refresh-tokens - the scopes needed are `modconfig`, `modcontributors` and `mysubreddits`. Remember to set redirect URL to the one the script is listening on (`http://localhost:8080``).
+   After running the script and inputting the right scopes you should be directed to an authentication URL and then a refresh token will be printed to the console.
+
+Either way, after you have the refresh token, go back to secrets and paste it into a `REDDIT_REFRESH_TOKEN` secret. Then make sure you delete `REDDIT_USERNAME` and `REDDIT_PASSWORD` since praw can be confused if it gets both authentication methods.
 
 ## How to change the schedule
 

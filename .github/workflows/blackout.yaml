@@ -43,6 +43,7 @@ jobs:
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
           REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
           REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
+          REDDIT_REFRESH_TOKEN: ${{ secrets.REDDIT_REFRESH_TOKEN }}
           REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
           SUBREDDIT_BLACKLIST: ${{ secrets.SUBREDDIT_BLACKLIST }}
           SUBREDDIT_WHITELIST: ${{ secrets.SUBREDDIT_WHITELIST }}

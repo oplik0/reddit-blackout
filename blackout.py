@@ -27,12 +27,14 @@ reddit = praw.Reddit(
     client_secret=environ.get('REDDIT_CLIENT_SECRET'),
     # this is the username of the account we want to delete all content from
     # should be yours otherwise it probably won't work :)
-    username=environ.get('REDDIT_USERNAME'),
+    username=environ.get('REDDIT_USERNAME') or None,
     # this is the password of the account we want to delete all content from
     # unfortunate it is necessary for this authentication method
-    password=environ.get('REDDIT_PASSWORD'),
+    password=environ.get('REDDIT_PASSWORD') or None,
     # Reddit Data API terms requires not masking the user agent - but I want this to be configurable in case they find this script and decide to block it
-    user_agent=environ.get('REDDIT_USER_AGENT') or "Blackout Bot",
+    user_agent=environ.get('REDDIT_USER_AGENT') or "Blackout script",
+    # alternative authentication method that works with 2FA, but is more complicated to set up
+    refresh_token=environ.get('REDDIT_REFRESH_TOKEN') or None
 )
 
 def selected_subreddits():
@@ -95,10 +97,11 @@ def unschedule():
             # remove all lines that contain "cron" or "schedule"
             if "cron" not in line and "schedule" not in line:
                 workflow.write(line)
+
 # a function just as good practice - so this can be imported and called from other scripts
 def main():
     """Set moderated subreddits to private."""
-    
+
     # set the mode - if we have a backup file, restore subreddits. Otherwise, private them.
     restore = exists("subreddits.csv") and exists("approved_users.csv")
 
