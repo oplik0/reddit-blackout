@@ -35,7 +35,7 @@ The `pyproject.toml` and `poetry.lock` files are from a tool called [Poetry](htt
     - `REDDIT_CLIENT_SECRET` - the app secret from earlier
     - `REDDIT_USERNAME` - your username
     - `REDDIT_PASSWORD` - your password; Unfortunately this authentication flow requires it. For hosted applications normal Oauth2 flow would be better, but as this repository is meant to be copied and used for a single account this is the least bad option. WARNING: 2FA unfortunately has to be disabled for this method to work
-    - `REDDIT_REFRESH_TOKEN` (optional, instead of username/password) - refresh token obtained from Reddit OAuth API for your account. Unfortunately, as the user is redirected to a specified website during this flow, it's not trivial to set it up here. More info in []
+    - `REDDIT_REFRESH_TOKEN` (optional, instead of username/password) - refresh token obtained from Reddit OAuth API for your account. Unfortunately, as the user is redirected to a specified website during this flow, it's not trivial to set it up here. More info in [How to use with 2FA](#how-to-use-with-2fa)
     - `REDDIT_USER_AGENT` (optional) - how the application will identify itself to Reddit. Defaults to "Blackout"
     - `SUBREDDIT_BLACKLIST` (optional) - comma separated list of subreddits excluded from being privated. Takes precedence over whitelist.
     - `SUBREDDIT_WHITELIST` (optional) - comma separated list of subreddits. If set, only the included subreddits will be privated
