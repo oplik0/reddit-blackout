@@ -41,10 +41,13 @@ def selected_subreddits():
     """Generator that returns all subreddits to be privated."""
     all_moderated = reddit.user.moderator_subreddits()
     # support both blacklisting and whitelisting - note that if both are set, exclusions takes precedence
-    excluded = split(r"\s*,\s*", environ.get('SUBREDDIT_BLACKLIST') or "") or []
-    included = split(r"\s*,\s*", environ.get('SUBREDDIT_WHITELIST') or "") or []
+    excluded = split(r"\s*,\s*", environ.get('SUBREDDIT_BLACKLIST') or "") if environ.get('SUBREDDIT_BLACKLIST') else []
+    included = split(r"\s*,\s*", environ.get('SUBREDDIT_WHITELIST') or "") if environ.get('SUBREDDIT_WHITELIST') else []
 
     for subreddit in all_moderated:
+        # skip subreddits that are already private, or are just users
+        if subreddit.subreddit_type in ["user", "private"]:
+            continue
         if subreddit.display_name in excluded:
             continue
         if not included or subreddit.display_name in included:
@@ -54,21 +57,21 @@ def selected_subreddits():
 def restore_subreddit(name, description, type):
     """Restore a subreddit to its previous state."""
     subreddit = reddit.subreddit(name)
-    subreddit.mod().update({
-        "public_description": description,
-        "subreddit_type": type
-    })
+    subreddit.mod.update(
+        public_description=description,
+        subreddit_type=type
+    )
 
-def restore_contributor(name, user):
+def restore_contributor(subreddit, user):
     """Restore a user to a subreddit's approved submitters list."""
-    subreddit = reddit.subreddit(name)
+    subreddit = reddit.subreddit(subreddit)
     subreddit.contributor.add(user)
 
 def private_subreddit(subreddit):
     """Set a subreddit to private."""
     # get the current description and type of the subreddit
     old_description = subreddit.public_description
-    old_type = subreddit.mod().settings().get("subreddit_type")
+    old_type = subreddit.mod.settings().get("subreddit_type")
     
     # remove all approved users
     for contributor in subreddit.contributor():
@@ -78,21 +81,20 @@ def private_subreddit(subreddit):
     new_description = f"/r/{subreddit.display_name} {environ.get('SUBREDDIT_DESCRIPTION')}" or f"/r/{subreddit.display_name} is now private to protest Reddits API pricing changes and the death of 3rd party apps. Click here to find out why we have gone dark](https://www.theverge.com/2023/6/5/23749188/reddit-subreddit-private-protest-api-changes-apollo-charges). [You can also find a list of other subs that are going dark here](https://reddark.untone.uk/)."
 
     # set the subreddit to private    
-    subreddit.mod.update({
-        "public_description": new_description,
-        "subreddit_type": "private",
-        "disable_contributor_requests": True
-    })
+    subreddit.mod.update(public_description=new_description,
+        subreddit_type="private",
+        disable_contributor_requests=True
+    )
 
     # return the old description and type so they can be restored later
     return old_description, old_type
 
 def unschedule():
     """Removes cron triggers from the action"""
-    with open(".github/workflows/blackout.yml", "r") as workflow:
+    with open(".github/workflows/blackout.yaml", "r") as workflow:
         # load the workflow file into memory
         lines = workflow.readlines()
-    with open(".github/workflows/blackout.yml", "w") as workflow:
+    with open(".github/workflows/blackout.yaml", "w") as workflow:
         for line in lines:
             # remove all lines that contain "cron" or "schedule"
             if "cron" not in line and "schedule" not in line:
@@ -111,15 +113,15 @@ def main():
         sub_count = 0
         user_count = 0
         with open("subreddits.csv", "r") as subreddits:
-            reader = csv.reader(subreddits)
+            reader = csv.DictReader(subreddits)
             for row in reader:
                 sub_count += 1
-                restore_subreddit(*row)
+                restore_subreddit(**row)
         with open("approved_users.csv", "r") as approved_users:
-            reader = csv.reader(approved_users)
+            reader = csv.DictReader(approved_users)
             for row in reader:
                 user_count += 1
-                restore_contributor(*row)
+                restore_contributor(**row)
         print(f"Restored {sub_count} subreddits and {user_count} approved users")
         
         # remove the backup files
@@ -130,26 +132,28 @@ def main():
         unschedule()
 
     else:
-        print("Privating subreddits")
+        print("Setting subreddits to private")
         # count the number of subreddits privated
         sub_count = 0
         with open("subreddits.csv", "w") as subreddits:
             with open("approved_users.csv", "w") as approved_users:
-                subreddits_writer = csv.writer(subreddits)
-                approved_users_writer = csv.writer(approved_users)
+                subreddits_writer = csv.DictWriter(subreddits, fieldnames=["name", "description", "type"])
+                approved_users_writer = csv.DictWriter(approved_users, fieldnames=["subreddit", "user"])
+                subreddits_writer.writeheader()
+                approved_users_writer.writeheader()
                 for subreddit in selected_subreddits():
                     sub_count += 1
                     # backup approved users
                     for contributor in subreddit.contributor():
-                        approved_users_writer.writerow([subreddit.display_name, contributor.name])
+                        approved_users_writer.writerow({"subreddit": subreddit.display_name,  "user": contributor.name})
                     
                     # set subreddit to private
                     old_description, old_type = private_subreddit(subreddit)
 
-                    # backup old description and type
-                    subreddits_writer.writerow([subreddit.display_name, old_description, old_type])
+                    # # backup old description and type
+                    subreddits_writer.writerow({"name": subreddit.display_name, "description": old_description, "type": old_type})
                     print(f"Privated {subreddit.display_name}")
-        print(f"Privated {sub_count} subreddits")
+        print(f"Set {sub_count} subreddits to private")
 
 # runs the main function if the script is called directly (eg. `python3 wipe_reddit_account.py`)
 # without this the main method wouldn't run
