@@ -1,4 +1,4 @@
-"""A simple script for privating a subreddit."""
+"""A simple script for privating subreddits for the blackout on 12th."""
 
 # imports some built in packages:
 # os.environ is used to access environmental variables, where we will pass our secrets and variables
