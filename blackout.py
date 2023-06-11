@@ -2,7 +2,8 @@
 
 # imports some built in packages:
 # os.environ is used to access environmental variables, where we will pass our secrets and variables
-from os import environ
+# os.remove is used to delete the backup files after they are no longer needed
+from os import environ, remove
 
 # os.path.exists is used to check if a file exists, which we will use for mode selection
 from os.path import exists
@@ -84,6 +85,16 @@ def private_subreddit(subreddit):
     # return the old description and type so they can be restored later
     return old_description, old_type
 
+def unschedule():
+    """Removes cron triggers from the action"""
+    with open(".github/workflows/blackout.yml", "r") as workflow:
+        # load the workflow file into memory
+        lines = workflow.readlines()
+    with open(".github/workflows/blackout.yml", "w") as workflow:
+        for line in lines:
+            # remove all lines that contain "cron" or "schedule"
+            if "cron" not in line and "schedule" not in line:
+                workflow.write(line)
 # a function just as good practice - so this can be imported and called from other scripts
 def main():
     """Set moderated subreddits to private."""
@@ -107,6 +118,14 @@ def main():
                 user_count += 1
                 restore_contributor(*row)
         print(f"Restored {sub_count} subreddits and {user_count} approved users")
+        
+        # remove the backup files
+        remove("subreddits.csv")
+        remove("approved_users.csv")
+
+        # remove the cron triggers from the workflow file
+        unschedule()
+
     else:
         print("Privating subreddits")
         # count the number of subreddits privated

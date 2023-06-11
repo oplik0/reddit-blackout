@@ -3,7 +3,7 @@ Set your subreddits to private for 48 hours
 
 ## What is this doing
 
-This repository contains a single simple python script (`wipe_reddit_account.py`) and a single GitHub Actions workflow (`.github/workflows/wipe_reddit_account.yml`). I recommend you read them yourself before giving this access to your account. They should hopefully be simple and well-commented enough to understand even without any programming experience.
+This repository contains a single simple python script (`blackout.py`) and a single GitHub Actions workflow (`.github/workflows/blackout.yml`). I recommend you read them yourself before giving this access to your account. They should hopefully be simple and well-commented enough to understand even without any programming experience.
 
 The `pyproject.toml` and `poetry.lock` files are from a tool called [Poetry](https://python-poetry.org/) which is a package manager for Python that I prefer over using `pip` directly. The workflow installs and uses poetry already, but if you want to develop it locally without Poetry, there is currently just a single dependency (`praw`), so you can just install it by running `pip install praw` instead.
 
@@ -58,4 +58,6 @@ on:
 
 If you aren't familiar with cron's notation (and even if you are), you can use a tool like [Crontab.guru](https://crontab.guru/) to create the expression.
 
-If you want an indefinite 
+## How to do indefinite blackout
+
+Just remove the schedule section of the workflow and run the workflow manually instead
