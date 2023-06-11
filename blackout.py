@@ -32,7 +32,7 @@ reddit = praw.Reddit(
     # unfortunate it is necessary for this authentication method
     password=environ.get('REDDIT_PASSWORD') or None,
     # Reddit Data API terms requires not masking the user agent - but I want this to be configurable in case they find this script and decide to block it
-    user_agent=environ.get('REDDIT_USER_AGENT') or "Blackout script",
+    user_agent=environ.get('REDDIT_USER_AGENT') or "Blackout",
     # alternative authentication method that works with 2FA, but is more complicated to set up
     refresh_token=environ.get('REDDIT_REFRESH_TOKEN') or None
 )
